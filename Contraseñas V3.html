@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Contraseñas Seguras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fontawesome/fontawesome-free/css/all.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/animate.css"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .password-box {
+            min-height: 50px;
+            overflow-x: auto;
+        }
+        .input-label {
+            font-weight: 600;
+        }
+        .shadow-xl {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(29, 78, 216, 1) 0%, rgba(72, 85, 99, 1) 100%);
+            border-radius: 20px;
+            padding: 30px;
+        }
+        .card-header {
+            font-size: 1.5rem;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+        }
+        .btn {
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2563eb;
+        }
+        .password-text {
+            font-family: 'Courier New', Courier, monospace;
+            word-wrap: break-word;
+            color: #f1f1f1;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-indigo-900 to-gray-800 text-white h-screen flex justify-center items-center p-4">
+
+    <div class="card shadow-xl w-full sm:w-96">
+        <h1 class="card-header text-xl mb-6">Generador de Contraseñas Seguras</h1>
+        
+        <div class="mb-4">
+            <label for="length" class="input-label text-sm">Longitud de la Contraseña:</label>
+            <input id="length" type="number" min="16" max="64" value="16" class="w-full p-2 mt-2 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400">
+        </div>
+
+        <div class="mb-4 flex items-center">
+            <label for="uppercase" class="input-label text-sm mr-2">Incluir Mayúsculas:</label>
+            <input id="uppercase" type="checkbox" checked class="form-checkbox rounded-sm text-indigo-600 focus:ring-indigo-500">
+        </div>
+
+        <div class="mb-4 flex items-center">
+            <label for="numbers" class="input-label text-sm mr-2">Incluir Números:</label>
+            <input id="numbers" type="checkbox" checked class="form-checkbox rounded-sm text-indigo-600 focus:ring-indigo-500">
+        </div>
+
+        <div class="mb-4 flex items-center">
+            <label for="special" class="input-label text-sm mr-2">Incluir Caracteres Especiales:</label>
+            <input id="special" type="checkbox" checked class="form-checkbox rounded-sm text-indigo-600 focus:ring-indigo-500">
+        </div>
+
+        <div class="mb-4 flex items-center">
+            <label for="dictionary" class="input-label text-sm mr-2">Incluir Palabras Aleatorias:</label>
+            <input id="dictionary" type="checkbox" class="form-checkbox rounded-sm text-indigo-600 focus:ring-indigo-500">
+        </div>
+
+        <div class="password-box bg-gray-700 p-4 rounded-lg mb-6 text-center">
+            <span id="password" class="text-lg font-mono text-gray-200">Aquí aparecerá tu contraseña</span>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <button id="generate" class="btn bg-indigo-500 hover:bg-indigo-400 text-white w-full sm:w-auto rounded-lg p-3 transition-all">
+                Generar Contraseña
+            </button>
+            <button id="copy" class="btn bg-green-500 hover:bg-green-400 text-white ml-2 w-full sm:w-auto rounded-lg p-3 transition-all">
+                Copiar
+            </button>
+        </div>
+
+        <div class="flex justify-center">
+            <button id="generate-multiple" class="btn bg-purple-600 hover:bg-purple-500 text-white w-full sm:w-auto rounded-lg p-3 transition-all">
+                Generar 5 Contraseñas
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Diccionario de palabras aleatorias
+        const dictionary = ["gato", "perro", "manzana", "libro", "sol", "luna", "flor", "mar", "montaña", "cielo"];
+        
+        // Función para generar contraseñas
+        function generatePassword() {
+            const length = parseInt(document.getElementById("length").value);
+            const includeUppercase = document.getElementById("uppercase").checked;
+            const includeNumbers = document.getElementById("numbers").checked;
+            const includeSpecial = document.getElementById("special").checked;
+            const useDictionary = document.getElementById("dictionary").checked;
+            
+            const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+            const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const numbers = '0123456789';
+            const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            let characters = lowerCase;
+
+            if (includeUppercase) characters += upperCase;
+            if (includeNumbers) characters += numbers;
+            if (includeSpecial) characters += specialChars;
+            
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomChar = characters.charAt(crypto.getRandomValues(new Uint32Array(1))[0] % characters.length);
+                password += randomChar;
+            }
+            
+            // Si se activa la opción de diccionario
+            if (useDictionary) {
+                const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+                const randomPosition = Math.floor(Math.random() * password.length);
+                password = password.slice(0, randomPosition) + randomWord + password.slice(randomPosition + randomWord.length);
+            }
+            
+            document.getElementById("password").innerText = password;
+        }
+
+        // Función para copiar la contraseña generada
+        document.getElementById("copy").addEventListener("click", function() {
+            const passwordText = document.getElementById("password").innerText;
+            navigator.clipboard.writeText(passwordText).then(() => {
+                alert("Contraseña copiada al portapapeles!");
+            });
+        });
+
+        // Generar múltiples contraseñas
+        document.getElementById("generate-multiple").addEventListener("click", function() {
+            for (let i = 0; i < 5; i++) {
+                generatePassword();
+            }
+        });
+
+        // Evento al hacer click en el botón de generar
+        document.getElementById("generate").addEventListener("click", generatePassword);
+    </script>
+
+</body>
+</html>
